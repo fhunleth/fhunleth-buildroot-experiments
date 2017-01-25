@@ -4,24 +4,11 @@ include $(sort $(wildcard $(BR2_EXTERNAL_RPI_PATH)/package/*/*.mk))
 FW_FILE=$(firstword $(wildcard $(BINARIES_DIR)/*.fw))
 
 # Replace everything on the SDCard with new bits
-burn-complete: burn
 burn:
-	@if [ -e "$(FW_FILE)" ]; then \
-		echo "Burning $(FW_FILE)..."; \
-		sudo $(HOST_DIR)/usr/bin/fwup -a -i $(FW_FILE) -t complete; \
-	else \
-		echo "ERROR: No firmware found. Check that 'make' completed successfully"; \
-		echo "and that a firmware (.fw) file is in $(BINARIES_DIR)."; \
-	fi
-
-# Upgrade the image on the SDCard (app data won't be removed)
-# This is usually the fastest way to update an SDCard that's already
-# been programmed. It won't update bootloaders, so if something is
-# really messed up, burn-complete may be better.
-burn-upgrade:
-	@if [ -e "$(FW_FILE)" ]; then \
-		echo "Upgrading $(FW_FILE)..."; \
-		sudo $(HOST_DIR)/usr/bin/fwup -a -i $(FW_FILE) -t upgrade; \
+	@FW_FILE=`ls -t $(BINARIES_DIR)/*.fw | head -1`; \
+	if [ -e "$${FW_FILE}" ]; then \
+		echo "Burning $${FW_FILE}..."; \
+		sudo $(HOST_DIR)/usr/bin/fwup $${FW_FILE}; \
 	else \
 		echo "ERROR: No firmware found. Check that 'make' completed successfully"; \
 		echo "and that a firmware (.fw) file is in $(BINARIES_DIR)."; \
@@ -54,4 +41,4 @@ rpi-help:
 	@echo "Buildroot Help"
 	@echo "--------------"
 
-.PHONY: burn burn-complete burn-upgrade rpi-help
+.PHONY: burn rpi-help
