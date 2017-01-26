@@ -1,0 +1,51 @@
+config BR2_PACKAGE_FBTFT_TOOLS
+	bool "fbtft_tools"
+	depends on BR2_LINUX_KERNEL
+	help
+	  Helpful kernel modules for Raspberry Pi PiTFT LCDs.
+
+	  https://github.com/notro/fbtft_tools
+
+if BR2_PACKAGE_FBTFT_TOOLS
+
+config BR2_PACKAGE_FBTFT_TOOLS_ADS7846_DEVICE
+	bool "ads7846_device"
+	help
+	  ads7846_device is a kernel module for registering an ads7846
+	  device.
+
+	  https://github.com/notro/fbtft_tools/wiki/ads7846_device
+
+config BR2_PACKAGE_FBTFT_TOOLS_GPIO_BACKLIGHT_DEVICE
+	bool "gpio_backlight_device"
+
+config BR2_PACKAGE_FBTFT_TOOLS_GPIO_KEYS_DEVICE
+	bool "gpio_keys_device"
+	help
+	  gpio_keys_device is a kernel module for registering a gpio_keys
+	  device.
+
+	  https://github.com/notro/fbtft_tools/wiki/gpio_keys_device
+
+config BR2_PACKAGE_FBTFT_TOOLS_GPIO_MOUSE_DEVICE
+	bool "gpio_mouse_device"
+	help
+	  gpio_mouse_device is a kernel module for registering a gpio_mouse
+	  device.
+
+	  https://github.com/notro/fbtft_tools/wiki/gpio_mouse_device
+
+config BR2_PACKAGE_FBTFT_TOOLS_RPI_POWER_SWITCH_DEVICE
+	bool "rpi_power_switch"
+
+config BR2_PACKAGE_FBTFT_TOOLS_STMPE_DEVICE
+	bool "stmpe_device"
+	help
+	  smtpe_device is a kernel module for registering an stmpe device.
+
+	  https://github.com/notro/fbtft_tools/wiki/stmpe_device
+
+endif # BR2_PACKAGE_FBTFT_TOOLS
+
+comment "fbtft_tools needs a Linux kernel to be built"
+	depends on !BR2_LINUX_KERNEL
