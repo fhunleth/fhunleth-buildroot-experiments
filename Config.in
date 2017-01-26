@@ -1,3 +1,4 @@
 # Custom packages
 
 source "$BR2_EXTERNAL_RPI_PATH/package/fbtft_tools/Config.in"
+source "$BR2_EXTERNAL_RPI_PATH/package/sdburner/Config.in"

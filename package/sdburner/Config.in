@@ -1,0 +1,6 @@
+config BR2_PACKAGE_SDBURNER
+        depends on BR2_PACKAGE_QT5
+        select BR2_PACKAGE_FWUP
+	bool "sdburner"
+	help
+	  Build the SDBurner application
