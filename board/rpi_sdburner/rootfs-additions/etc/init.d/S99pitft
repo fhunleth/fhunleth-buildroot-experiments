@@ -1,0 +1,19 @@
+#!/bin/sh
+
+#
+# Initialize the PiTFT
+#
+
+case "$1" in
+    start)
+        # Load the gpio_keys_device helper to set the buttons to be A,B,C,D
+        modprobe gpio_keys_device pullup active_low keys=17:30,22:48,23:46,27:32
+        ;;
+    stop)
+        rmmod gpio_keys_device
+        ;;
+
+    *)
+        # Don't handle any other conditions
+        exit 0
+esac
