@@ -4,8 +4,10 @@
 #
 ################################################################################
 
-SDBURNER_VERSION = 64dafe022875dadd29b3e2ddafb2398f835ab56c
-SDBURNER_SITE = $(call github,fhunleth,sdburner,$(SDBURNER_VERSION))
+SDBURNER_VERSION = 6384620b6650f673304b15a7c9b67eb38ed3377a
+#SDBURNER_SITE = $(call github,fhunleth,sdburner,$(SDBURNER_VERSION))
+SDBURNER_SITE = /home/fhunleth/experiments/sdburner
+SDBURNER_SITE_METHOD = local
 SDBURNER_LICENSE = Apache2
 SDBURNER_DEPENDENCIES = qt5base fwup
 

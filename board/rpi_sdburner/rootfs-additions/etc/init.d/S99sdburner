@@ -1,0 +1,18 @@
+#!/bin/sh
+
+#
+# Start the main application
+#
+
+case "$1" in
+    start)
+        QT_QPA_EVDEV_KEYBOARD_PARAMETERS=/dev/input/event0 sdburner -platform linuxfb:fb=/dev/fb1 &
+        ;;
+    stop)
+        killall sdburner
+        ;;
+
+    *)
+        # Don't handle any other conditions
+        exit 0
+esac
