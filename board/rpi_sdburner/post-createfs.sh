@@ -9,10 +9,6 @@ if [[ -z $FWNAME ]]; then
     FWNAME=rpi_sdburner-$(git -C $BR2_EXTERNAL_RPI_PATH describe --dirty)
 fi
 
-# Mark the Raspberry Pi kernel image as using device tree
-$HOST_DIR/usr/bin/mkknlimg \
-    $BINARIES_DIR/zImage $BINARIES_DIR/zImage.mkknlimg
-
 FWUP_CONFIG=$BR2_EXTERNAL_RPI_PATH/board/rpi_sdburner/fwup.conf
 FWUP=$HOST_DIR/usr/bin/fwup
 
