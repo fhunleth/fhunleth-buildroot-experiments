@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-SDBURNER_VERSION = 6384620b6650f673304b15a7c9b67eb38ed3377a
+SDBURNER_VERSION = ca86d3ed3f331ba6146df71a6020c91aa28d45c9
 #SDBURNER_SITE = $(call github,fhunleth,sdburner,$(SDBURNER_VERSION))
 SDBURNER_SITE = /home/fhunleth/experiments/sdburner
 SDBURNER_SITE_METHOD = local

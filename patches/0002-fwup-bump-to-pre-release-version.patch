@@ -1,0 +1,45 @@
+From ef277f8ec5033816e30b0407bba4a86cd8007d7f Mon Sep 17 00:00:00 2001
+From: Frank Hunleth <fhunleth@troodon-software.com>
+Date: Thu, 8 Sep 2016 11:05:36 -0400
+Subject: [PATCH 02/11] fwup: bump to pre-release version
+
+---
+ package/fwup/fwup.hash      | 2 --
+ package/fwup/fwup.hash.hide | 2 ++
+ package/fwup/fwup.mk        | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+ delete mode 100644 package/fwup/fwup.hash
+ create mode 100644 package/fwup/fwup.hash.hide
+
+diff --git a/package/fwup/fwup.hash b/package/fwup/fwup.hash
+deleted file mode 100644
+index e21eff0..0000000
+--- a/package/fwup/fwup.hash
++++ /dev/null
+@@ -1,2 +0,0 @@
+-# Locally calculated
+-sha256   64c3a0ac38dc11c0c05b2588a89638cbc37f5552ac0f1c290f7ee5365f2bba49      fwup-v0.8.2.tar.gz
+diff --git a/package/fwup/fwup.hash.hide b/package/fwup/fwup.hash.hide
+new file mode 100644
+index 0000000..78747f3
+--- /dev/null
++++ b/package/fwup/fwup.hash.hide
+@@ -0,0 +1,2 @@
++# Locally calculated
++sha256   8272af37539bec1ac2e5ee01bf28a738e112cec395155e560e24e74bb72f62db      fwup-v0.12.0.tar.gz
+diff --git a/package/fwup/fwup.mk b/package/fwup/fwup.mk
+index d87bdca..df9b356 100644
+--- a/package/fwup/fwup.mk
++++ b/package/fwup/fwup.mk
+@@ -4,7 +4,7 @@
+ #
+ #############################################################
+ 
+-FWUP_VERSION = v0.8.2
++FWUP_VERSION = ea134111770da5800b1bc64a6a46df7a4224efaf
+ FWUP_SITE = $(call github,fhunleth,fwup,$(FWUP_VERSION))
+ FWUP_LICENSE = Apache-2.0
+ FWUP_LICENSE_FILES = LICENSE
+-- 
+2.7.4
+
