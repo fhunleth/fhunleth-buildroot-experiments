@@ -1,4 +1,4 @@
-# Raspberry Pi Experiments Buildroot
+# Buildroot projects
 
 ## System prep
 
@@ -29,17 +29,7 @@ patient. The build products can be found in the `images` directory.
 
 # Applications
 
-## SDBurner
+The following projects are available:
 
-This is a simple Raspberry Pi+PiTFT hat+Card Reader device that makes
-programming SDCards really easy. One would have thought that installing software
-on a laptop to program SDCards would not be hard, but it turns out to be brutal
-when kids borrow laptops from parents, friends, etc. Some businesses lock down USB ports,
-some parents have impossibly old laptops, and sometimes no one knows the admin
-password. Well, no more. This little device reprograms Raspberry Pi MicroSD
-cards in no time at all.
-
-### Interim notes
-
-    QT_QPA_EVDEV_KEYBOARD_PARAMETERS=/dev/input/event0 sdburner -platform linuxfb:fb=/dev/fb1
+1. Raspberry Pi SDCard writer appliance ([README.md](board/rpi_sdburner/README.md)
 
