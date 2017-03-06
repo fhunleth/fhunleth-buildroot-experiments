@@ -6,10 +6,10 @@ TARGETDIR=$1
 FWNAME=$2
 
 if [[ -z $FWNAME ]]; then
-    FWNAME=rpi_sdburner-$(git -C $BR2_EXTERNAL_RPI_PATH describe --dirty)
+    FWNAME=rpi_sdburner-$(git -C $BR2_EXTERNAL_FHUNLETH_PATH describe --dirty)
 fi
 
-FWUP_CONFIG=$BR2_EXTERNAL_RPI_PATH/board/rpi_sdburner/fwup.conf
+FWUP_CONFIG=$BR2_EXTERNAL_FHUNLETH_PATH/board/rpi_sdburner/fwup.conf
 FWUP=$HOST_DIR/usr/bin/fwup
 
 FW_PATH=$BINARIES_DIR/$FWNAME.fw

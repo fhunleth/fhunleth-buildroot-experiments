@@ -1,5 +1,5 @@
 # Include custom packages
-include $(sort $(wildcard $(BR2_EXTERNAL_RPI_PATH)/package/*/*.mk))
+include $(sort $(wildcard $(BR2_EXTERNAL_FHUNLETH_PATH)/package/*/*.mk))
 
 FW_FILE=$(firstword $(wildcard $(BINARIES_DIR)/*.fw))
 
@@ -14,11 +14,11 @@ burn:
 		echo "and that a firmware (.fw) file is in $(BINARIES_DIR)."; \
 	fi
 
-help: rpi-help
+help: more-help
 
-rpi-help:
-	@echo "RPi Experiments Help"
-	@echo "--------------------"
+more-help:
+	@echo "Frank Hunleth's Buildroot Experiments Help"
+	@echo "------------------------------------------"
 	@echo
 	@echo "This build directory is configured to create the system described in:"
 	@echo
@@ -41,4 +41,4 @@ rpi-help:
 	@echo "Buildroot Help"
 	@echo "--------------"
 
-.PHONY: burn rpi-help
+.PHONY: burn more-help
