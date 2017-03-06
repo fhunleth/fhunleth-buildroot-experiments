@@ -14,12 +14,11 @@ allows multiple configurations to be tried simultaneously and keeps the source
 tree clean.
 
 Assuming that you've cloned this project already, create a build directory by
-running `./create_build.sh <defconfig> <path to build directory>`. Here's an
-example invocation:
+running `./create-build.sh <defconfig> <path to build directory>`. To create
+build directories for all configurations (which is what I do), run
+`./create-all-builds.sh`
 
-    $ ./create_build.sh configs/fillmein_defconfig o/fillmein
-
-Then build the firmware:
+Then build the project that you want:
 
     $ cd o/fillmein
     $ make
@@ -31,5 +30,6 @@ patient. The build products can be found in the `images` directory.
 
 The following projects are available:
 
-1. Raspberry Pi SDCard writer appliance ([README.md](board/rpi_sdburner/README.md)
+1. Raspberry Pi SDCard writer appliance ([README.md](board/rpi_sdburner/README.md))
+2. Nerves firmware installer for [Vultr](https://www.vultr.com/)
 

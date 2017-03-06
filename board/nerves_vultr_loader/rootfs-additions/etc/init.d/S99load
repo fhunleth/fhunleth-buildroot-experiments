@@ -1,0 +1,37 @@
+#!/bin/sh
+
+#
+# Install the .fw image to the SSD
+#
+
+DEST=/dev/vda
+FWIMAGE=/root/nerves.fw
+
+install() {
+    echo "Starting installation..."
+
+    if [ ! -e $FWIMAGE ]; then
+        echo "Couldn't find $FWIMAGE. Check the .ipxe script to see if it was copied."
+        exit 1
+    fi
+
+    /usr/bin/fwup -a -i $FWIMAGE -d $DEST -t complete
+    if [ $? = 0 ]; then
+        echo "Installation successful!!"
+        echo "The system will reboot."
+
+        reboot
+    else
+        echo "Installation failed! Not powering off so that the system can be debugged."
+    fi
+}
+
+case "$1" in
+    start)
+        install
+        ;;
+
+    *)
+        # Don't handle any other conditions
+        exit 0
+esac
