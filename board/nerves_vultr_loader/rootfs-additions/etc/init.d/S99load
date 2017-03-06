@@ -5,7 +5,7 @@
 #
 
 DEST=/dev/vda
-FWIMAGE=/root/nerves.fw
+FWIMAGE=/root/install.fw
 
 install() {
     echo "Starting installation..."
