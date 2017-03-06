@@ -1,4 +1,8 @@
-# Buildroot projects
+# Fhunleth's Buildroot Experiments
+
+The projects in here are half-baked or not so half-baked experiments that for
+whatever reason haven't been separated out into their own repository. Usually
+it's because keeping Buildroot projects here makes them easier to maintain.
 
 ## System prep
 
@@ -26,9 +30,9 @@ Then build the project that you want:
 It can take some time to download and build everything so you may need to be
 patient. The build products can be found in the `images` directory.
 
-# Applications
+# Projects
 
-The following projects are available:
+The following projects can be built:
 
 1. Raspberry Pi SDCard writer appliance ([README.md](board/rpi_sdburner/README.md))
 2. Nerves firmware installer for [Vultr](https://www.vultr.com/)
