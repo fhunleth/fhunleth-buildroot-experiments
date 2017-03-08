@@ -5,30 +5,81 @@
 #
 
 DEST=/dev/vda
+
+# Files copied over in the iPXE script
 FWIMAGE=/root/install.fw
+AUTHORIZED_KEYS=/root/authorized_keys
 
-install() {
-    echo "Starting installation..."
-
+check_reqs() {
     if [ ! -e $FWIMAGE ]; then
         echo "Couldn't find $FWIMAGE. Check the .ipxe script to see if it was copied."
         exit 1
     fi
 
-    /usr/bin/fwup -a -i $FWIMAGE -d $DEST -t complete
-    if [ $? = 0 ]; then
-        echo "Installation successful!!"
-        echo "The system will reboot."
+    if [ ! -e $AUTHORIZED_KEYS ]; then
+        echo "Couldn't find $AUTHORIZED_KEYS. Check the .ipxe script to see if it was copied."
+        exit 1
+    fi
+}
 
-        reboot
-    else
+# Flush as much cached data as Linux lets us.
+flush_fscache() {
+    sync
+    echo 1 > /proc/sys/vm/drop_caches
+    echo 2 > /proc/sys/vm/drop_caches
+    echo 3 > /proc/sys/vm/drop_caches
+}
+
+provision() {
+    echo "Provisioning..."
+
+    # Load new partitions created by fwup
+    partprobe
+    sleep 1
+
+    # Mount the first partition since it's where provisioned data is stored
+    mount /dev/vda1 /mnt
+
+    # Create ssh host keys
+    mkdir -p /mnt/ssh
+    ssh-keygen -t rsa -P "" -f "/mnt/ssh/ssh_host_rsa_key"
+
+    # Copy over the authorized keys file
+    cp $AUTHORIZED_KEYS /mnt/ssh/authorized_keys
+
+    umount /mnt
+    flush_fscache
+}
+
+format_app_partition() {
+    echo "Formatting app partition..."
+
+    # For the embedded case, we'd let the app initialize its data
+    # partition to execise the recovery code, but for server deployments,
+    # that really seems like overkill.
+    /usr/sbin/mke2fs -q -F -t ext4 -O ^huge_file -L appdata /dev/vda4
+}
+
+install() {
+    echo "Installing..."
+
+    /usr/bin/fwup -a -i $FWIMAGE -d $DEST -t complete
+    if [ $? -ne 0 ]; then
         echo "Installation failed! Not powering off so that the system can be debugged."
+        exit 1
     fi
 }
 
 case "$1" in
     start)
+        check_reqs
         install
+        provision
+        format_app_partition
+
+        echo "Installation successful!!"
+        echo "The system will reboot."
+        reboot
         ;;
 
     *)

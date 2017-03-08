@@ -13,16 +13,18 @@
 # and then click iPXE. The "iPXE Chain URL" is the URL to this file.
 
 # Download the loader's Linux kernel
-kernel bzImage
+kernel https://s3.amazonaws.com/files.troodon-software.com/vultr/bzImage
 
 # Download the loader's root filesystem
-initrd rootfs.cpio.xz
+initrd https://s3.amazonaws.com/files.troodon-software.com/vultr/rootfs.cpio.xz
 
 # Download the Nerves .fw file into the root filesystem
-initrd testfile.txt /root/install.fw
+# IMPORTANT: Update this to your .fw file
+initrd https://s3.amazonaws.com/files.troodon-software.com/vultr/nerves_system_vultr.fw /root/install.fw
 
 # Download the ssh public key
-# TODO
+# IMPORTANT: Update this to your public key
+initrd https://s3.amazonaws.com/files.troodon-software.com/vultr/authorized_keys /root/authorized_keys
 
 # Boot!!
 boot
