@@ -1,0 +1,18 @@
+# Please note that this is only a sample, we recommend you to change it to fit
+# your needs.
+# You should override this file using a post-build script.
+# See http://buildroot.org/downloads/manual/manual.html#rootfs-custom
+# and http://elinux.org/RPiconfig for a description of config.txt syntax
+# Device tree options are documented at
+# https://github.com/raspberrypi/documentation/blob/master/configuration/device-tree.md
+
+kernel=zImage
+
+# Enable I2C and SPI
+dtparam=i2c_arm=on,spi=on
+
+dtoverlay=dwc2
+dtoverlay=pi3-disable-bt
+
+# Enable the UART (/dev/ttyS0) on the RPi3.
+enable_uart=1

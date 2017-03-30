@@ -1,0 +1,18 @@
+#!/bin/sh
+
+#
+# Start the main application
+#
+
+case "$1" in
+    start)
+        /usr/bin/scrollphatnametag.py &
+        ;;
+    stop)
+        killall python
+        ;;
+
+    *)
+        # Don't handle any other conditions
+        exit 0
+esac
