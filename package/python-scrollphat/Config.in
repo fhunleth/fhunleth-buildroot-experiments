@@ -1,0 +1,8 @@
+config BR2_PACKAGE_PYTHON_SCROLLPHAT
+	bool "python-scrollphat"
+	select BR2_PACKAGE_PYTHON_SMBUS_CFFI
+	select BR2_PACKAGE_PYTHON_ZLIB
+	help
+	  A Python module for the Scroll pHAT. 11x5 LEDs of goodness!
+
+	  https://github.com/pimoroni/scroll-phat
