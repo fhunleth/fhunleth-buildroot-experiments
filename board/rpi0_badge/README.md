@@ -15,6 +15,7 @@ Parts list:
 * 3 mm spacer
 * Laser cut acrylic back -> [.dxf](scroll-badge.dxf)
 * 3 AAA NiMH batteries (should be relatively high capacity)
+* Ribbon or other material for a neck strap
 
 The 5V regulator was wired to the Raspberry Pi and the battery. We then taped it to
 the back of the Pi Zero. The Pi Zero and the Scroll pHAT were then screwed down
@@ -23,6 +24,8 @@ regulator and the through-hole GPIO connector.
 
 Even though we made holes for the battery holder, we ended up using a wire to
 tie it to the back. That was due to lack of proper screws.
+
+The holes at the top of the acryplic piece are for the neck strap.
 
 The software image is configured to provide a shell prompt through the USB port.
 To use it, take the batteries out and connect the RPi 0 to your laptop via a
