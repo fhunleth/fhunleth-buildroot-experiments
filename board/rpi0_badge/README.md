@@ -34,6 +34,6 @@ MicroUSB cable. Open up the serial port and log in as "root" with password
 
 We did a simple power measurement and found that the whole device was taking
 about 500 mW. AAA batteries don't have that much capacity so make sure that you
-have 900 mAh ones or better. Ours worked plenty well to experiment and show it
-off.
+have 800 mAh ones or better. The 800 mAh ones we used lasted 5 hours per
+charge.
 
