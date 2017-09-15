@@ -22,9 +22,5 @@ initrd https://s3.amazonaws.com/files.troodon-software.com/vultr/rootfs.cpio.xz
 # IMPORTANT: Update this to your .fw file
 initrd https://s3.amazonaws.com/files.troodon-software.com/vultr/nerves_system_vultr.fw /root/install.fw
 
-# Download the ssh public key
-# IMPORTANT: Update this to your public key
-initrd https://s3.amazonaws.com/files.troodon-software.com/vultr/authorized_keys /root/authorized_keys
-
 # Boot!!
 boot

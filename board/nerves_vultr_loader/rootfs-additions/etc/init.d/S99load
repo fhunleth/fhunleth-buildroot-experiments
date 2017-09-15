@@ -8,16 +8,10 @@ DEST=/dev/vda
 
 # Files copied over in the iPXE script
 FWIMAGE=/root/install.fw
-AUTHORIZED_KEYS=/root/authorized_keys
 
 check_reqs() {
     if [ ! -e $FWIMAGE ]; then
         echo "Couldn't find $FWIMAGE. Check the .ipxe script to see if it was copied."
-        exit 1
-    fi
-
-    if [ ! -e $AUTHORIZED_KEYS ]; then
-        echo "Couldn't find $AUTHORIZED_KEYS. Check the .ipxe script to see if it was copied."
         exit 1
     fi
 }
@@ -43,9 +37,6 @@ provision() {
     # Create ssh host keys
     mkdir -p /mnt/ssh
     ssh-keygen -t rsa -P "" -f "/mnt/ssh/ssh_host_rsa_key"
-
-    # Copy over the authorized keys file
-    cp $AUTHORIZED_KEYS /mnt/ssh/authorized_keys
 
     umount /mnt
     flush_fscache
