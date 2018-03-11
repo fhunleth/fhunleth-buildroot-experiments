@@ -1,0 +1,34 @@
+From 8ebae05643047591d3ac0d4471d10d0e1dc4aefc Mon Sep 17 00:00:00 2001
+From: Frank Hunleth <fhunleth@troodon-software.com>
+Date: Sun, 25 Jun 2017 22:32:02 -0400
+Subject: [PATCH] fwup: bump to v1.0.0
+
+---
+ package/fwup/fwup.hash | 2 +-
+ package/fwup/fwup.mk   | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/package/fwup/fwup.hash b/package/fwup/fwup.hash
+index 32398bf..c46f7ef 100644
+--- a/package/fwup/fwup.hash
++++ b/package/fwup/fwup.hash
+@@ -1,2 +1,2 @@
+ # Locally calculated
+-sha256 852e255bd65f9db473a06184abb3e94e3b6b86be7bf66169e8df8146d5966ae1  fwup-v0.15.4.tar.gz
++sha256 7ee1c24e9bea934b426fa8c19e1aa716d630ed7241942edaeabba7c10b48f6bd  fwup-v1.0.0.tar.gz
+diff --git a/package/fwup/fwup.mk b/package/fwup/fwup.mk
+index c6a18c2..fcd504f 100644
+--- a/package/fwup/fwup.mk
++++ b/package/fwup/fwup.mk
+@@ -4,7 +4,7 @@
+ #
+ ################################################################################
+ 
+-FWUP_VERSION = v0.15.4
++FWUP_VERSION = v1.0.0
+ FWUP_SITE = $(call github,fhunleth,fwup,$(FWUP_VERSION))
+ FWUP_LICENSE = Apache-2.0
+ FWUP_LICENSE_FILES = LICENSE
+-- 
+2.7.4
+

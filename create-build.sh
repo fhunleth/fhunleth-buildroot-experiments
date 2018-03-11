@@ -12,8 +12,9 @@
 #
 
 set -e
+#set -x
 
-BUILDROOT_VERSION=2017.05
+BUILDROOT_VERSION=2018.02
 
 DEFCONFIG=$1
 BUILD_DIR=$2
@@ -56,8 +57,14 @@ fi
 
 # Check that the host can build an image
 HOST_OS=$(uname -s)
+HOST_ARCH=$(uname -m)
 if [[ $HOST_OS != "Linux" ]]; then
     echo "ERROR: This only works on Linux"
+    exit 1
+fi
+
+if [[ $HOST_ARCH != "x86_64" ]]; then
+    echo "ERROR: 64-bit Linux probably required for running cross-compilers"
     exit 1
 fi
 
@@ -91,7 +98,7 @@ create_buildroot_dir() {
     $BASE_DIR/scripts/download-buildroot.sh $BUILDROOT_VERSION $BUILDROOT_DL_DIR $BASE_DIR
 
     # Apply patches
-    $BASE_DIR/buildroot/support/scripts/apply-patches.sh $BASE_DIR/buildroot $BASE_DIR/patches
+    $BASE_DIR/buildroot/support/scripts/apply-patches.sh $BASE_DIR/buildroot $BASE_DIR/patches/buildroot
 
     if ! [[ -z $BUILDROOT_DL_DIR ]]; then
         # Symlink Buildroot's dl directory so that it can be cached between builds
