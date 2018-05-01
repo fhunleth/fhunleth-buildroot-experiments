@@ -1,0 +1,12 @@
+#!ipxe
+
+# Vultr iPXE VM loader script
+#
+# When you create the VM in Vultr, select "Upload ISO" for the Server Type,
+# and then click iPXE. The "iPXE Chain URL" is the URL to this file.
+
+# Download the loader's Linux kernel
+kernel https://s3.amazonaws.com/files.troodon-software.com/mqtt_server/bzImage
+
+# Boot!!
+boot
