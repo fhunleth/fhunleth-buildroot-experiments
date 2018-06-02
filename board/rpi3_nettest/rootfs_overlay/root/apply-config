@@ -1,0 +1,34 @@
+#!/bin/sh
+
+CONFIG=$1
+
+if [ ! -d "$CONFIG" ]; then
+    echo "Pass a config"
+    exit 1
+fi
+
+remount
+
+cat "$CONFIG/README.md"
+
+echo "Taking interfaces down..."
+ifdown -a || true
+
+echo "Waiting 1 second to see if that helps the lan78xx driver"
+sleep 1
+
+echo "Saving before state..."
+ip link > "$CONFIG/ip-link.before"
+ip addr > "$CONFIG/ip-addr.before"
+ip route > "$CONFIG/ip-route.before"
+
+echo "Applying config..."
+cp -r "$CONFIG"/etc/* /etc
+ifup -a
+
+echo "Saving after state"
+ip link > "$CONFIG/ip-link.after"
+ip addr > "$CONFIG/ip-addr.after"
+ip route > "$CONFIG/ip-route.after"
+
+

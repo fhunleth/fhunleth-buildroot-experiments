@@ -1,0 +1,3 @@
+# Wired Ethernet w/ DHCP
+
+
