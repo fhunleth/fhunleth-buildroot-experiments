@@ -9,6 +9,11 @@
 
 kernel=zImage
 
+# This, along with the Raspberry Pi "x" firmware is need for the camera
+# to work. The Raspberry Pi "x" firmware is selected via the Buildroot
+# configuration. See Target packages->Hardware handling->Firmware.
+gpu_mem=192
+
 # Enable the UART (/dev/ttyAMA0) on the RPi3.
 enable_uart=1
 dtoverlay=pi3-miniuart-bt
