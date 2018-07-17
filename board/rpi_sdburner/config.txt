@@ -14,3 +14,12 @@ dtparam=i2c1=on
 dtparam=i2c_arm=on
 dtoverlay=pitft22,rotate=270,speed=32000000,fps=20
 
+# I think this may work as well
+#dtoverlay=pitft22,rotate=270,speed=64000000,fps=30
+
+dtoverlay=gpio-key,gpio=17,active_low=1,gpio_pull=up,label="KEY_A",keycode=30
+dtoverlay=gpio-key,gpio=22,active_low=1,gpio_pull=up,label="KEY_B",keycode=48
+dtoverlay=gpio-key,gpio=23,active_low=1,gpio_pull=up,label="KEY_C",keycode=46
+dtoverlay=gpio-key,gpio=27,active_low=1,gpio_pull=up,label="KEY_D",keycode=32
+
+

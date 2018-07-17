@@ -6,7 +6,7 @@
 
 case "$1" in
     start)
-        QT_QPA_EVDEV_KEYBOARD_PARAMETERS=/dev/input/event0 sdburner -platform linuxfb:fb=/dev/fb1 &
+        QT_QPA_EVDEV_KEYBOARD_PARAMETERS=/dev/input/event3:/dev/input/event2:/dev/input/event1:/dev/input/event0 sdburner -platform linuxfb:fb=/dev/fb1 &
         ;;
     stop)
         killall sdburner
