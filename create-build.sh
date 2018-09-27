@@ -14,7 +14,7 @@
 set -e
 #set -x
 
-BUILDROOT_VERSION=2018.05
+BUILDROOT_VERSION=2018.08
 
 DEFCONFIG=$1
 BUILD_DIR=$2
@@ -27,7 +27,7 @@ readlink_f () {
     if [[ -h "$filename" ]]; then
         readlink_f "$(readlink "$filename")"
     else
-        echo "`pwd -P`/$filename"
+        echo "$(pwd -P)/$filename"
     fi
 }
 
@@ -39,19 +39,19 @@ if [[ -z $DEFCONFIG ]]; then
 fi
 
 if [[ -z $BUILD_DIR ]]; then
-    BUILD_DIR=o/$(basename -s _defconfig $DEFCONFIG)
+    BUILD_DIR=o/$(basename -s _defconfig "$DEFCONFIG")
 fi
 
 # Create the build directory if it doesn't already exist
-mkdir -p $BUILD_DIR
+mkdir -p "$BUILD_DIR"
 
 # Normalize paths that were specified
-ABS_DEFCONFIG=$(readlink_f $DEFCONFIG)
-ABS_DEFCONFIG_DIR=$(dirname $ABS_DEFCONFIG)
-ABS_BUILD_DIR=$(readlink_f $BUILD_DIR)
+ABS_DEFCONFIG=$(readlink_f "$DEFCONFIG")
+ABS_DEFCONFIG_DIR=$(dirname "$ABS_DEFCONFIG")
+ABS_BUILD_DIR=$(readlink_f "$BUILD_DIR")
 
-if [[ ! -f $ABS_DEFCONFIG ]]; then
-    echo "ERROR: Can't find $ABS_DEFCONFIG. Please check that it exists."
+if [[ ! -f "$ABS_DEFCONFIG" ]]; then
+    echo "ERROR: Can't find "$ABS_DEFCONFIG". Please check that it exists."
     exit 1
 fi
 
@@ -88,17 +88,17 @@ fi
 
 BUILDROOT_STATE_FILE=$BASE_DIR/buildroot-$BUILDROOT_VERSION/.fwup-examples-br-state
 BUILDROOT_EXPECTED_STATE_FILE=$BUILD_DIR/.fwup-examples-expected-br-state
-$BASE_DIR/scripts/buildroot-state.sh $BUILDROOT_VERSION $BASE_DIR/patches > $BUILDROOT_EXPECTED_STATE_FILE
+"$BASE_DIR/scripts/buildroot-state.sh" $BUILDROOT_VERSION "$BASE_DIR/patches" > "$BUILDROOT_EXPECTED_STATE_FILE"
 
 create_buildroot_dir() {
     # Clean up any old versions of Buildroot
-    rm -fr $BASE_DIR/buildroot*
+    rm -fr "$BASE_DIR"/buildroot*
 
     # Download and extract Buildroot
-    $BASE_DIR/scripts/download-buildroot.sh $BUILDROOT_VERSION $BUILDROOT_DL_DIR $BASE_DIR
+    "$BASE_DIR/scripts/download-buildroot.sh" $BUILDROOT_VERSION $BUILDROOT_DL_DIR $BASE_DIR
 
     # Apply patches
-    $BASE_DIR/buildroot/support/scripts/apply-patches.sh $BASE_DIR/buildroot $BASE_DIR/patches/buildroot
+    "$BASE_DIR/buildroot/support/scripts/apply-patches.sh" "$BASE_DIR/buildroot" "$BASE_DIR/patches/buildroot"
 
     if ! [[ -z $BUILDROOT_DL_DIR ]]; then
         # Symlink Buildroot's dl directory so that it can be cached between builds
@@ -110,7 +110,7 @@ create_buildroot_dir() {
 
 if [[ ! -e $BUILDROOT_STATE_FILE ]]; then
     create_buildroot_dir
-elif ! diff $BUILDROOT_STATE_FILE $BUILDROOT_EXPECTED_STATE_FILE >/dev/null; then
+elif ! diff "$BUILDROOT_STATE_FILE" "$BUILDROOT_EXPECTED_STATE_FILE" >/dev/null; then
     echo "Detected a difference in the Buildroot source tree either due"
     echo "to an change in Buildroot or a change in the patches that get"
     echo "applied to Buildroot. The Buildroot source tree will be updated."
@@ -119,7 +119,7 @@ elif ! diff $BUILDROOT_STATE_FILE $BUILDROOT_EXPECTED_STATE_FILE >/dev/null; the
     echo "To do this, go to $BUILD_DIR, and run 'make clean'."
     echo
     echo "Press return to acknowledge or CTRL-C to stop"
-    read
+    read -r
     create_buildroot_dir
 fi
 
