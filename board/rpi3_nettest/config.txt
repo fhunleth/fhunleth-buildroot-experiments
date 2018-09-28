@@ -17,3 +17,6 @@ gpu_mem=192
 # Enable the UART (/dev/ttyAMA0) on the RPi3.
 enable_uart=1
 dtoverlay=pi3-miniuart-bt
+
+# The docs on this are shaky - I'm not sure if it's even looked at on the RPi3
+max_usb_current=1
