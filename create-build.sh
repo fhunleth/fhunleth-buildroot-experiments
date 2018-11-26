@@ -83,6 +83,9 @@ fi
 if [[ -z $BUILDROOT_DL_DIR ]]; then
     if [[ -e $HOME/dl ]]; then
         BUILDROOT_DL_DIR=$HOME/dl
+    else
+        BUILDROOT_DL_DIR="$BASE_DIR/dl"
+        mkdir -p "$BASE_DIR/dl"
     fi
 fi
 
