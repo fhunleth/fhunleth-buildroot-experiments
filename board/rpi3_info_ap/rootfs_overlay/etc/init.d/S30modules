@@ -1,0 +1,46 @@
+#!/bin/sh
+#
+# Load kernel modules
+#
+
+start() {
+    printf "Starting modules: "
+
+    # RPi 3 B+ Ethernet
+    modprobe lan78xx
+
+    # RPi 3 B Ethernet (I think)
+    modprobe smsc95xx
+
+    # RPi WiFi
+    modprobe brcmfmac
+
+    echo "OK"
+}
+
+stop() {
+    printf "Stopping modules: "
+    rmmod lan78xx
+    rmmod smsc95xx
+    rmmod brcmfmac
+    echo "OK"
+}
+
+case "$1" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  restart|reload)
+    stop
+    start
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart}"
+    exit 1
+esac
+
+exit $?
+

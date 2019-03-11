@@ -1,0 +1,19 @@
+# Default Nerves RPi 3 config.txt
+#
+# It's possible to override this file by using a custom fwup.conf
+# configuration to pull in a replacement.
+#
+# Useful links:
+# https://www.raspberrypi.org/documentation/configuration/config-txt/README.md
+# https://github.com/raspberrypi/documentation/blob/master/configuration/device-tree.md
+
+kernel=zImage
+
+# This, along with the Raspberry Pi "x" firmware is need for the camera
+# to work. The Raspberry Pi "x" firmware is selected via the Buildroot
+# configuration. See Target packages->Hardware handling->Firmware.
+gpu_mem=192
+
+# Enable the UART (/dev/ttyAMA0) on the RPi3.
+enable_uart=1
+dtoverlay=pi3-miniuart-bt
