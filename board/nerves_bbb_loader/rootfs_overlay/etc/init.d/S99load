@@ -1,0 +1,42 @@
+#!/bin/sh
+
+#
+# Install the .fw image to eMMC
+#
+
+DEST=/dev/mmcblk1
+
+# Fixme
+FWIMAGE=/mnt/install.fw
+
+check_reqs() {
+    if [ ! -e $FWIMAGE ]; then
+        echo "Couldn't find $FWIMAGE. Make sure that it's on the MicroSD card."
+        exit 1
+    fi
+}
+
+install() {
+    echo "Installing..."
+
+    /usr/bin/fwup -a -i $FWIMAGE -d $DEST -t complete
+    if [ $? -ne 0 ]; then
+        echo "Installation failed! Not powering off so that the system can be debugged."
+        exit 1
+    fi
+}
+
+case "$1" in
+    start)
+        check_reqs
+        install
+
+        echo "Installation successful!!"
+        echo "The system will reboot."
+        #reboot
+        ;;
+
+    *)
+        # Don't handle any other conditions
+        exit 0
+esac
