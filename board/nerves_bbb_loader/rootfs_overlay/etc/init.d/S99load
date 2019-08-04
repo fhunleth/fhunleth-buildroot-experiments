@@ -7,11 +7,11 @@
 DEST=/dev/mmcblk1
 
 # Fixme
-FWIMAGE=/mnt/install.fw
+FWIMAGE=$(ls /mnt/*.fw | head -1)
 
 check_reqs() {
     if [ ! -e $FWIMAGE ]; then
-        echo "Couldn't find $FWIMAGE. Make sure that it's on the MicroSD card."
+        echo "Couldn't find a firmware file. Copy one to the MicroSD card and try again."
         exit 1
     fi
 }
@@ -33,6 +33,8 @@ case "$1" in
 
         echo "Installation successful!!"
         echo "The system will reboot."
+
+        echo "Just kidding. Rebooting is commented out for now"
         #reboot
         ;;
 
