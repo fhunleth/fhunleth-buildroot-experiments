@@ -1,35 +1,21 @@
-From fb91a726cde095e6d54e86ba36efcd29a4a5f5f9 Mon Sep 17 00:00:00 2001
+From feb99914d158347c0e25072849a34dbc55f588a6 Mon Sep 17 00:00:00 2001
 From: Robert Nelson <robertcnelson@gmail.com>
-Date: Tue, 14 Aug 2018 21:00:21 -0500
-Subject: [PATCH] U-Boot: BeagleBone Cape Manager
+Date: Tue, 9 Apr 2019 09:38:02 -0500
+Subject: [PATCH 2/3] U-Boot-BeagleBone-Cape-Manager
 
 Signed-off-by: Robert Nelson <robertcnelson@gmail.com>
 ---
- arch/arm/mach-omap2/am33xx/clock_am33xx.c |   1 +
- board/ti/am335x/board.c                   | 462 ++++++++++++++++++++++
- board/ti/am335x/board.h                   |  17 +
- board/ti/am335x/hash-string.h             |  59 +++
- board/ti/am335x/mux.c                     |  15 +
- include/configs/ti_armv7_common.h         | 219 ++++++++++
- include/configs/ti_armv7_omap.h           |   3 +
- include/environment/ti/mmc.h              |  15 +
- 8 files changed, 791 insertions(+)
+ board/ti/am335x/board.c           | 453 ++++++++++++++++++++++++++++++
+ board/ti/am335x/board.h           |  16 ++
+ board/ti/am335x/hash-string.h     |  59 ++++
+ include/configs/ti_armv7_common.h | 211 ++++++++++++++
+ include/configs/ti_armv7_omap.h   |   3 +
+ include/environment/ti/mmc.h      |  15 +
+ 6 files changed, 757 insertions(+)
  create mode 100644 board/ti/am335x/hash-string.h
 
-diff --git a/arch/arm/mach-omap2/am33xx/clock_am33xx.c b/arch/arm/mach-omap2/am33xx/clock_am33xx.c
-index 32cdf63..fb871c2 100644
---- a/arch/arm/mach-omap2/am33xx/clock_am33xx.c
-+++ b/arch/arm/mach-omap2/am33xx/clock_am33xx.c
-@@ -220,6 +220,7 @@ void enable_basic_clocks(void)
- 		&cmper->gpio2clkctrl,
- 		&cmper->gpio3clkctrl,
- 		&cmper->i2c1clkctrl,
-+		&cmper->i2c2clkctrl,
- 		&cmper->cpgmac0clkctrl,
- 		&cmper->spi0clkctrl,
- 		&cmrtc->rtcclkctrl,
 diff --git a/board/ti/am335x/board.c b/board/ti/am335x/board.c
-index ca03925..e2ee1fc 100644
+index 4cefacf1a4..169c851116 100644
 --- a/board/ti/am335x/board.c
 +++ b/board/ti/am335x/board.c
 @@ -39,6 +39,7 @@
@@ -40,14 +26,16 @@ index ca03925..e2ee1fc 100644
  
  DECLARE_GLOBAL_DATA_PTR;
  
-@@ -76,9 +77,462 @@ void do_board_detect(void)
+@@ -77,9 +78,453 @@ void do_board_detect(void)
  	if (ti_i2c_eeprom_am_get(CONFIG_EEPROM_BUS_ADDRESS,
  				 CONFIG_EEPROM_CHIP_ADDRESS))
  		printf("ti_i2c_eeprom_init failed\n");
 +
 +	//hack-ish, needs to mux'ed early, in do_cape_detect was too late...
 +	enable_i2c2_pin_mux();
++#ifndef CONFIG_DM_I2C
 +	i2c_init(CONFIG_SYS_OMAP24_I2C_SPEED2, CONFIG_SYS_OMAP24_I2C_SLAVE2);
++#endif
  }
  #endif
  
@@ -55,23 +43,6 @@ index ca03925..e2ee1fc 100644
 +#define CAPE_EEPROM_ADDR1	0x55
 +#define CAPE_EEPROM_ADDR2	0x56
 +#define CAPE_EEPROM_ADDR3	0x57
-+
-+void write_hex (unsigned char i)
-+{
-+	char cc;
-+
-+	cc = i >> 4;
-+	cc &= 0xf;
-+	if (cc > 9)
-+		serial_putc (cc + 55);
-+	else
-+		serial_putc (cc + 48);
-+	cc = i & 0xf;
-+	if (cc > 9)
-+		serial_putc (cc + 55);
-+	else
-+		serial_putc (cc + 48);
-+}
 +
 +#define NOT_POP		0x0
 +#define PINS_TAKEN	0x0
@@ -183,7 +154,7 @@ index ca03925..e2ee1fc 100644
 +			puts("Model: SanCloud BeagleBone Enhanced:\n");
 +			base_dtb=BBE_BASE_DTB;
 +			cape_universal=CAPE_UNIVERSAL_BBB;
-+			name = "SBBE";
++			name = "BBEN";
 +		}
 +		if (!strncmp(board_ti_get_rev(), "ME0", 3)) {
 +			puts("Model: MENTOREL BeagleBone uSomIQ:\n");
@@ -235,7 +206,7 @@ index ca03925..e2ee1fc 100644
 +
 +	for ( addr = CAPE_EEPROM_ADDR0; addr <= CAPE_EEPROM_ADDR3; addr++ ) {
 +		if (i2c_probe(addr)) {
-+			puts("BeagleBone: cape eeprom: i2c_probe: 0x");  write_hex(addr); puts(":\n");
++			printf("BeagleBone: cape eeprom: i2c_probe: 0x%x:\n", addr);
 +		} else {
 +			/* read the eeprom using i2c */
 +			if (i2c_read(addr, 0, 2, (uchar *)cape_header,
@@ -270,7 +241,7 @@ index ca03925..e2ee1fc 100644
 +						end_part_number=i;
 +						i=17;
 +					} else {
-+						write_hex(process_cape_part_number[i]);
++						printf("%x", process_cape_part_number[i]);
 +					}
 +				}
 +				puts("]\n");
@@ -289,9 +260,7 @@ index ca03925..e2ee1fc 100644
 +
 +				unsigned long cape_overlay_hash = hash_string(cape_overlay);
 +
-+				puts("BeagleBone: cape eeprom: i2c_probe: 0x");
-+				write_hex(addr);
-+				printf(": %s [0x%lx]\n", cape_overlay, cape_overlay_hash);
++				printf("BeagleBone: cape eeprom: i2c_probe: 0x%x: %s [0x%lx]\n", addr, cape_overlay, cape_overlay_hash);
 +
 +				strncat(cape_overlay_pass_to_kernel, process_cape_part_number, end_part_number);
 +				strncat(cape_overlay_pass_to_kernel, ",", 1);
@@ -312,6 +281,9 @@ index ca03925..e2ee1fc 100644
 +					case 0x93b574f: /* /lib/firmware/BB-GREEN-HDMI-00A0.dtbo */
 +						virtual_video=PINS_TAKEN;
 +						break;
++					case 0x9dcd73f: /* /lib/firmware/BB-BONE-NH10C-01-00A0.dtbo */
++						virtual_video=PINS_TAKEN;
++						break;
 +					case 0xb1b7bbf: /* /lib/firmware/bb-justboom-amp-00A0.dtbo */
 +						virtual_audio=PINS_TAKEN;
 +						break;
@@ -321,6 +293,9 @@ index ca03925..e2ee1fc 100644
 +						break;
 +					case 0xd4c9eff: /* /lib/firmware/bb-justboom-digi-00A0.dtbo */
 +						virtual_audio=PINS_TAKEN;
++						break;
++					case 0xe05061f: /* /lib/firmware/BBORG_DISPLAY70-00A2.dtbo */
++						virtual_video=PINS_TAKEN;
 +						break;
 +					case 0xe3f55df: /* /lib/firmware/BB-BONE-NH7C-01-A0.dtbo */
 +						virtual_video=PINS_TAKEN;
@@ -387,7 +362,7 @@ index ca03925..e2ee1fc 100644
 +				}
 +				env_set("uboot_detected_capes", "1");
 +			} else {
-+				puts("BeagleBone: found invalid cape eeprom: i2c_probe: 0x");  write_hex(addr); puts(":\n");
++				printf("BeagleBone: found invalid cape eeprom: i2c_probe: 0x%x:\n", addr);
 +			}
 +		}
 +	}//for
@@ -496,14 +471,16 @@ index ca03925..e2ee1fc 100644
 +{
 +	struct am335x_cape_eeprom_id cape_header;
 +
++#ifndef CONFIG_DM_I2C
 +	i2c_init(CONFIG_SYS_OMAP24_I2C_SPEED2, CONFIG_SYS_OMAP24_I2C_SLAVE2);
++#endif
 +	probe_cape_eeprom(&cape_header);
 +}
 +
  #ifndef CONFIG_DM_SERIAL
  struct serial_device *default_serial_console(void)
  {
-@@ -855,6 +1309,14 @@ int board_late_init(void)
+@@ -951,6 +1396,14 @@ int board_late_init(void)
  			env_set("serial#", board_serial);
  	}
  
@@ -519,7 +496,7 @@ index ca03925..e2ee1fc 100644
  }
  #endif
 diff --git a/board/ti/am335x/board.h b/board/ti/am335x/board.h
-index b658914..df64fca 100644
+index a4e0e04f8f..c90034617f 100644
 --- a/board/ti/am335x/board.h
 +++ b/board/ti/am335x/board.h
 @@ -10,6 +10,22 @@
@@ -545,16 +522,9 @@ index b658914..df64fca 100644
  /**
   * AM335X (EMIF_4D) EMIF REG_COS_COUNT_1, REG_COS_COUNT_2, and
   * REG_PR_OLD_COUNT values to avoid LCDC DMA FIFO underflows and Frame
-@@ -128,5 +144,6 @@ void enable_uart3_pin_mux(void);
- void enable_uart4_pin_mux(void);
- void enable_uart5_pin_mux(void);
- void enable_i2c0_pin_mux(void);
-+void enable_i2c2_pin_mux(void);
- void enable_board_pin_mux(void);
- #endif
 diff --git a/board/ti/am335x/hash-string.h b/board/ti/am335x/hash-string.h
 new file mode 100644
-index 0000000..b267a87
+index 0000000000..b267a87788
 --- /dev/null
 +++ b/board/ti/am335x/hash-string.h
 @@ -0,0 +1,59 @@
@@ -617,102 +587,47 @@ index 0000000..b267a87
 +    }
 +  return hval;
 +}
-diff --git a/board/ti/am335x/mux.c b/board/ti/am335x/mux.c
-index dc0189a..8eb99c3 100644
---- a/board/ti/am335x/mux.c
-+++ b/board/ti/am335x/mux.c
-@@ -120,6 +120,14 @@ static struct module_pin_mux i2c1_pin_mux[] = {
- 	{-1},
- };
- 
-+static struct module_pin_mux i2c2_pin_mux[] = {
-+	{OFFSET(uart1_ctsn), (MODE(3) | RXACTIVE |
-+			PULLUP_EN | PULLUDEN | SLEWCTRL)},	/* I2C_DATA */
-+	{OFFSET(uart1_rtsn), (MODE(3) | RXACTIVE |
-+			PULLUP_EN | PULLUDEN | SLEWCTRL)},	/* I2C_SCLK */
-+	{-1},
-+};
-+
- static struct module_pin_mux spi0_pin_mux[] = {
- 	{OFFSET(spi0_sclk), (MODE(0) | RXACTIVE | PULLUDEN)},	/* SPI0_SCLK */
- 	{OFFSET(spi0_d0), (MODE(0) | RXACTIVE |
-@@ -304,6 +312,11 @@ void enable_i2c0_pin_mux(void)
- 	configure_module_pin_mux(i2c0_pin_mux);
- }
- 
-+void enable_i2c2_pin_mux(void)
-+{
-+	configure_module_pin_mux(i2c2_pin_mux);
-+}
-+
- /*
-  * The AM335x GP EVM, if daughter card(s) are connected, can have 8
-  * different profiles.  These profiles determine what peripherals are
-@@ -356,6 +369,7 @@ void enable_board_pin_mux(void)
- #else
- 		configure_module_pin_mux(mmc1_pin_mux);
- #endif
-+		configure_module_pin_mux(i2c2_pin_mux);
- 	} else if (board_is_gp_evm()) {
- 		/* General Purpose EVM */
- 		unsigned short profile = detect_daughter_board_profile();
-@@ -401,6 +415,7 @@ void enable_board_pin_mux(void)
- #else
- 		configure_module_pin_mux(mmc1_pin_mux);
- #endif
-+		configure_module_pin_mux(i2c2_pin_mux);
- 	} else if (board_is_pb()) {
- 		configure_module_pin_mux(mii1_pin_mux);
- 		configure_module_pin_mux(mmc0_pin_mux);
 diff --git a/include/configs/ti_armv7_common.h b/include/configs/ti_armv7_common.h
-index b0f517c..f47080f 100644
+index 74a51dcd2a..f0a58c358b 100644
 --- a/include/configs/ti_armv7_common.h
 +++ b/include/configs/ti_armv7_common.h
-@@ -338,6 +338,51 @@
+@@ -333,6 +333,43 @@
  			"echo loading ${bootdir}/${bootfile} ...; "\
  			"run loadimage;" \
  			"setenv fdtdir /boot/dtbs/${uname_r}; " \
 +			"echo debug: [enable_uboot_overlays=${enable_uboot_overlays}] ... ;" \
 +			"if test -n ${enable_uboot_overlays}; then " \
-+				"if test -n ${dtb}; then " \
-+					"echo uboot_overlays: dtb=${dtb} is set in /boot/uEnv.txt, unable to use [${uboot_base_dtb_univ} or ${uboot_base_dtb}] ... ;" \
-+					"if test -n ${enable_uboot_overlays}; then " \
-+						"env delete -f enable_uboot_overlays; " \
-+						"echo uboot_overlays: disabling [enable_uboot_overlays=1] as dtb=${dtb} is set in /boot/uEnv.txt ... ;" \
-+					"fi;" \
-+				"else " \
-+					"echo debug: [enable_uboot_cape_universal=${enable_uboot_cape_universal}] ... ;" \
-+					"if test -n ${enable_uboot_cape_universal}; then " \
-+						"echo debug: [uboot_base_dtb_univ=${uboot_base_dtb_univ}] ... ;" \
-+						"if test -n ${uboot_base_dtb_univ}; then " \
-+							"echo uboot_overlays: [uboot_base_dtb=${uboot_base_dtb_univ}] ... ;" \
-+							"if test -e ${devtype} ${bootpart} ${fdtdir}/${uboot_base_dtb_univ}; then " \
-+								"setenv fdtfile ${uboot_base_dtb_univ};" \
-+								"echo uboot_overlays: Switching too: dtb=${fdtfile} ...;" \
-+								"if test -n ${uboot_try_cape_universal}; then " \
-+									"env delete -f uboot_try_cape_universal; " \
-+								"fi;" \
-+								"setenv cape_uboot bone_capemgr.uboot_capemgr_enabled=1; " \
-+							"else " \
-+								"echo debug: unable to find [${uboot_base_dtb_univ}] using [${uboot_base_dtb}] instead ... ;" \
-+								"echo debug: [uboot_base_dtb_univ=${uboot_base_dtb}] ... ;" \
-+								"if test -n ${uboot_base_dtb}; then " \
-+									"echo uboot_overlays: [uboot_base_dtb=${uboot_base_dtb}] ... ;" \
-+									"if test -e ${devtype} ${bootpart} ${fdtdir}/${uboot_base_dtb}; then " \
-+										"setenv fdtfile ${uboot_base_dtb};" \
-+										"echo uboot_overlays: Switching too: dtb=${fdtfile} ...;" \
-+									"fi;" \
++				"echo debug: [enable_uboot_cape_universal=${enable_uboot_cape_universal}] ... ;" \
++				"if test -n ${enable_uboot_cape_universal}; then " \
++					"echo debug: [uboot_base_dtb_univ=${uboot_base_dtb_univ}] ... ;" \
++					"if test -n ${uboot_base_dtb_univ}; then " \
++						"echo uboot_overlays: [uboot_base_dtb=${uboot_base_dtb_univ}] ... ;" \
++						"if test -e ${devtype} ${bootpart} ${fdtdir}/${uboot_base_dtb_univ}; then " \
++							"setenv fdtfile ${uboot_base_dtb_univ};" \
++							"echo uboot_overlays: Switching too: dtb=${fdtfile} ...;" \
++							"if test -n ${uboot_try_cape_universal}; then " \
++								"env delete -f uboot_try_cape_universal; " \
++							"fi;" \
++							"setenv cape_uboot bone_capemgr.uboot_capemgr_enabled=1; " \
++						"else " \
++							"echo debug: unable to find [${uboot_base_dtb_univ}] using [${uboot_base_dtb}] instead ... ;" \
++							"echo debug: [uboot_base_dtb_univ=${uboot_base_dtb}] ... ;" \
++							"if test -n ${uboot_base_dtb}; then " \
++								"echo uboot_overlays: [uboot_base_dtb=${uboot_base_dtb}] ... ;" \
++								"if test -e ${devtype} ${bootpart} ${fdtdir}/${uboot_base_dtb}; then " \
++									"setenv fdtfile ${uboot_base_dtb};" \
++									"echo uboot_overlays: Switching too: dtb=${fdtfile} ...;" \
 +								"fi;" \
 +							"fi;" \
 +						"fi;" \
-+					"else " \
-+						"echo debug: [uboot_base_dtb_univ=${uboot_base_dtb}] ... ;" \
-+						"if test -n ${uboot_base_dtb}; then " \
-+							"echo uboot_overlays: [uboot_base_dtb=${uboot_base_dtb}] ... ;" \
-+							"if test -e ${devtype} ${bootpart} ${fdtdir}/${uboot_base_dtb}; then " \
-+								"setenv fdtfile ${uboot_base_dtb};" \
-+								"echo uboot_overlays: Switching too: dtb=${fdtfile} ...;" \
-+							"fi;" \
++					"fi;" \
++				"else " \
++					"echo debug: [uboot_base_dtb_univ=${uboot_base_dtb}] ... ;" \
++					"if test -n ${uboot_base_dtb}; then " \
++						"echo uboot_overlays: [uboot_base_dtb=${uboot_base_dtb}] ... ;" \
++						"if test -e ${devtype} ${bootpart} ${fdtdir}/${uboot_base_dtb}; then " \
++							"setenv fdtfile ${uboot_base_dtb};" \
++							"echo uboot_overlays: Switching too: dtb=${fdtfile} ...;" \
 +						"fi;" \
 +					"fi;" \
 +				"fi;" \
@@ -720,7 +635,7 @@ index b0f517c..f47080f 100644
  			"if test -e ${devtype} ${bootpart} ${fdtdir}/${fdtfile}; then " \
  				"run loadfdt;" \
  			"else " \
-@@ -378,6 +423,180 @@
+@@ -373,6 +410,180 @@
  					"fi;" \
  				"fi;" \
  			"fi; " \
@@ -902,7 +817,7 @@ index b0f517c..f47080f 100644
  			"if test -e ${devtype} ${bootpart} ${bootdir}/${rdfile}; then " \
  				"echo loading ${bootdir}/${rdfile} ...; "\
 diff --git a/include/configs/ti_armv7_omap.h b/include/configs/ti_armv7_omap.h
-index 98b5839..ce7927e 100644
+index 98b5839154..ce7927e89e 100644
 --- a/include/configs/ti_armv7_omap.h
 +++ b/include/configs/ti_armv7_omap.h
 @@ -11,6 +11,9 @@
@@ -916,7 +831,7 @@ index 98b5839..ce7927e 100644
   * GPMC NAND block.  We support 1 device and the physical address to
   * access CS0 at is 0x8000000.
 diff --git a/include/environment/ti/mmc.h b/include/environment/ti/mmc.h
-index 110c426..d6bbe3e 100644
+index 110c426058..d6bbe3ea8e 100644
 --- a/include/environment/ti/mmc.h
 +++ b/include/environment/ti/mmc.h
 @@ -68,6 +68,21 @@
@@ -942,5 +857,5 @@ index 110c426..d6bbe3e 100644
  		"ums 0 ${devtype} 1;\0" \
  	"envboot=mmc dev ${mmcdev}; " \
 -- 
-2.17.1
+2.20.1
 
