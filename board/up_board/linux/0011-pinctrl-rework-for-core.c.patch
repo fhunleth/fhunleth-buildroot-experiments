@@ -1,0 +1,75 @@
+From 433487cbcb8ed0826d0f88870c9ed83112852bf8 Mon Sep 17 00:00:00 2001
+From: Carlos Calderon <carlos@emutex.com>
+Date: Thu, 4 Oct 2018 15:30:30 +0100
+Subject: [PATCH 11/19] pinctrl: rework for core.c
+
+Necessary a rework over pinctrl_gpio_set_config function
+
+to remove old pinctrl_get_device_gpio_range as defined in
+"pinctrl: allow multiple pin controllers for a GPIO"
+
+Also, included configuration for gpio in all controllers.
+---
+ drivers/pinctrl/core.c | 43 ++++++++++++++++++++++++++++++++++---------
+ 1 file changed, 34 insertions(+), 9 deletions(-)
+
+diff --git a/drivers/pinctrl/core.c b/drivers/pinctrl/core.c
+index f1c46d2..65d1f9a 100644
+--- a/drivers/pinctrl/core.c
++++ b/drivers/pinctrl/core.c
+@@ -866,18 +866,43 @@ EXPORT_SYMBOL_GPL(pinctrl_gpio_direction_output);
+ int pinctrl_gpio_set_config(unsigned gpio, unsigned long config)
+ {
+ 	unsigned long configs[] = { config };
+-	struct pinctrl_gpio_range *range;
+ 	struct pinctrl_dev *pctldev;
+-	int ret, pin;
++	struct gpio_desc *desc;
++	int dir;
++	int ret = -EPROBE_DEFER;
+ 
+-	ret = pinctrl_get_device_gpio_range(gpio, &pctldev, &range);
+-	if (ret)
+-		return ret;
++	desc = gpio_to_desc(gpio);
++	if (!desc) {
++		pr_err("gpio_to_desc(%d) returned NULL", gpio);
++		return -ENODEV;
++	}
+ 
+-	mutex_lock(&pctldev->mutex);
+-	pin = gpio_to_pin(range, gpio);
+-	ret = pinconf_set_config(pctldev, pin, configs, ARRAY_SIZE(configs));
+-	mutex_unlock(&pctldev->mutex);
++	dir = gpiod_get_direction(desc);
++
++	mutex_lock(&pinctrldev_list_mutex);
++
++	/*
++	 * NOTE: this code suppose that if we have multiple pinctrl declared for
++	 * the same gpio those are configured in series.
++	 * In this situation we need to avoid the case were momentarely
++	 * multiple pinctrl try do drive the same line to a different logic value
++	 *
++	 * (1st pinctrl) 1>-----<0 (2nd pinctrl)
++	 *
++	 * To obtain that we need to mind the order in which the multiple pinctrl
++	 * are configured depending of the desired gpio direction (input, output)
++	 */
++	if (dir == 1) {
++		list_for_each_entry(pctldev, &pinctrldev_list, node) {
++			ret = pinconf_set_config(pctldev, gpio, configs, ARRAY_SIZE(configs));
++		}
++	} else {
++		list_for_each_entry_reverse(pctldev, &pinctrldev_list, node) {
++			ret = pinconf_set_config(pctldev, gpio, configs, ARRAY_SIZE(configs));
++		}
++	}
++
++	mutex_unlock(&pinctrldev_list_mutex);
+ 
+ 	return ret;
+ }
+-- 
+2.7.4
+

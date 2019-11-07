@@ -1,0 +1,67 @@
+From 0b6a04bcaf0819225b3ace4e0a7645afbc896fbf Mon Sep 17 00:00:00 2001
+From: Dan O'Donovan <dan@emutex.com>
+Date: Tue, 11 Dec 2018 15:50:13 +0000
+Subject: [PATCH 18/19] correct the number of GPIOs for CREX and CRST02 boards
+
+The CREX and CRST02 boards actually have only 22 GPIO pins, unlike
+UP and UP^2 boards which have 28.  So the number of GPIOs to declare
+when registering the gpiochip device (for RPi emulation) needs to be
+determined depending on the ACPI ID.
+
+Signed-off-by: Dan O'Donovan <dan@emutex.com>
+---
+ drivers/pinctrl/pinctrl-upboard.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/pinctrl/pinctrl-upboard.c b/drivers/pinctrl/pinctrl-upboard.c
+index dea2cf0..e4af343 100644
+--- a/drivers/pinctrl/pinctrl-upboard.c
++++ b/drivers/pinctrl/pinctrl-upboard.c
+@@ -813,7 +813,6 @@ static int upboard_gpio_direction_output(struct gpio_chip *gc,
+ static struct gpio_chip upboard_gpio_chip = {
+ 	.label = "Raspberry Pi compatible UP GPIO",
+ 	.base = 0,
+-	.ngpio = ARRAY_SIZE(upboard_up_rpi_mapping),
+ 	.request = upboard_gpio_request,
+ 	.free = upboard_gpio_free,
+ 	.get = upboard_gpio_get,
+@@ -855,6 +854,7 @@ static int __init upboard_pinctrl_probe(struct platform_device *pdev)
+ 	const struct dmi_system_id *system_id;
+ 	const char *hid;
+ 	const unsigned int *rpi_mapping;
++	unsigned ngpio;
+ 	int ret;
+ 	int i;
+ 
+@@ -868,16 +868,20 @@ static int __init upboard_pinctrl_probe(struct platform_device *pdev)
+ 	if (!strcmp(hid, "AANT0F00")) {
+ 		pctldesc = &upboard_up_pinctrl_desc;
+ 		rpi_mapping = upboard_up_rpi_mapping;
++		ngpio  = ARRAY_SIZE(upboard_up_rpi_mapping);
+ 	} else if (!strcmp(hid, "AANT0F01")) {
+ 		pctldesc = &upboard_up2_pinctrl_desc;
+ 		rpi_mapping = upboard_up2_rpi_mapping;
++		ngpio  = ARRAY_SIZE(upboard_up2_rpi_mapping);
+ 	} else if (!strcmp(hid, "AANT0F02")) {
+ 		pctldesc = &upboard_upcore_crex_pinctrl_desc;
+ 		rpi_mapping = upboard_upcore_crex_rpi_mapping;
++		ngpio  = ARRAY_SIZE(upboard_upcore_crex_rpi_mapping);
+ 		bios_info = &upboard_upcore_crex_bios_info;
+ 	} else if (!strcmp(hid, "AANT0F03")) {
+ 		pctldesc = &upboard_upcore_crst02_pinctrl_desc;
+ 		rpi_mapping = upboard_upcore_crst02_rpi_mapping;
++		ngpio  = ARRAY_SIZE(upboard_upcore_crst02_rpi_mapping);
+ 		bios_info = &upboard_upcore_crst02_bios_info;
+ 	} else
+ 		return -ENODEV;
+@@ -951,6 +955,7 @@ static int __init upboard_pinctrl_probe(struct platform_device *pdev)
+ 	pctrl->rpi_mapping = rpi_mapping;
+ 	pctrl->chip = upboard_gpio_chip;
+ 	pctrl->chip.parent = &pdev->dev;
++	pctrl->chip.ngpio = ngpio;
+ 
+ 	ret = devm_gpiochip_add_data(&pdev->dev, &pctrl->chip, &pctrl->chip);
+ 	if (ret)
+-- 
+2.7.4
+

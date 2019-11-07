@@ -1,0 +1,83 @@
+From 5c517a894c437bc796922c1dfedab184a5739d27 Mon Sep 17 00:00:00 2001
+From: Dan O'Donovan <dan@emutex.com>
+Date: Tue, 11 Dec 2018 15:44:52 +0000
+Subject: [PATCH 17/19] pinctrl-upboard: add separate regmap patches for CREX
+ and CRST02
+
+CREX actually has only a subset of the CRST02 registers (no
+UPFPGA_REG_GPIO_ENx registers), so requires a slightly different
+regmap patch.
+
+Signed-off-by: Dan O'Donovan <dan@emutex.com>
+---
+ drivers/pinctrl/pinctrl-upboard.c | 45 +++++++++++++++++++++++++++++----------
+ 1 file changed, 34 insertions(+), 11 deletions(-)
+
+diff --git a/drivers/pinctrl/pinctrl-upboard.c b/drivers/pinctrl/pinctrl-upboard.c
+index 5dae769..dea2cf0 100644
+--- a/drivers/pinctrl/pinctrl-upboard.c
++++ b/drivers/pinctrl/pinctrl-upboard.c
+@@ -552,6 +552,37 @@ static const struct reg_sequence upboard_upcore_crex_reg_patches[] __initconst =
+ 		BIT(UPFPGA_UPCORE_CREX_I2S2_CLK) |
+ 		BIT(UPFPGA_UPCORE_CREX_I2S2_RX)
+ 	},
++};
++
++static const struct upboard_bios upboard_upcore_crex_bios_info __initconst = {
++	.patches = upboard_upcore_crex_reg_patches,
++	.npatches = ARRAY_SIZE(upboard_upcore_crex_reg_patches),
++};
++
++/*
++ * UP Core board + CRST02 carrier board data
++ */
++
++#define upboard_upcore_crst02_pins        upboard_upcore_crex_pins
++#define upboard_upcore_crst02_rpi_mapping upboard_upcore_crex_rpi_mapping
++
++/*
++ * Init patches applied to the registers until the BIOS sets proper defaults
++ */
++static const struct reg_sequence upboard_upcore_crst02_reg_patches[] __initconst = {
++	// enable I2C voltage-level shifters
++	{ UPFPGA_REG_FUNC_EN0,
++		BIT(UPFPGA_I2C0_EN) |
++		BIT(UPFPGA_I2C1_EN)
++	},
++	// HAT function pins initially set as inputs
++	{ UPFPGA_REG_GPIO_DIR0,
++		BIT(UPFPGA_UPCORE_CREX_SPI2_MISO) |
++		BIT(UPFPGA_UPCORE_CREX_UART1_RXD) |
++		BIT(UPFPGA_UPCORE_CREX_I2S2_FRM) |
++		BIT(UPFPGA_UPCORE_CREX_I2S2_CLK) |
++		BIT(UPFPGA_UPCORE_CREX_I2S2_RX)
++	},
+ 	// HAT function pins initially enabled (i.e. not hi-Z)
+ 	{ UPFPGA_REG_GPIO_EN0,
+ 		BIT(UPFPGA_UPCORE_CREX_SPI2_CS0) |
+@@ -571,19 +602,11 @@ static const struct reg_sequence upboard_upcore_crex_reg_patches[] __initconst =
+ 	},
+ };
+ 
+-static const struct upboard_bios upboard_upcore_crex_bios_info __initconst = {
+-	.patches = upboard_upcore_crex_reg_patches,
+-	.npatches = ARRAY_SIZE(upboard_upcore_crex_reg_patches),
++static const struct upboard_bios upboard_upcore_crst02_bios_info __initconst = {
++	.patches = upboard_upcore_crst02_reg_patches,
++	.npatches = ARRAY_SIZE(upboard_upcore_crst02_reg_patches),
+ };
+ 
+-/*
+- * UP Core board + CRST02 carrier board data
+- */
+-
+-#define upboard_upcore_crst02_pins        upboard_upcore_crex_pins
+-#define upboard_upcore_crst02_rpi_mapping upboard_upcore_crex_rpi_mapping
+-#define upboard_upcore_crst02_bios_info   upboard_upcore_crex_bios_info
+-
+ static int upboard_set_mux(struct pinctrl_dev *pctldev, unsigned int function,
+ 			   unsigned int group)
+ {
+-- 
+2.7.4
+

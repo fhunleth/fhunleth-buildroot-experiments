@@ -1,0 +1,29 @@
+From 99d4c5caeb3b16517bbd539cd2adf55ca7ac2e51 Mon Sep 17 00:00:00 2001
+From: Dan O'Donovan <dan@emutex.com>
+Date: Thu, 19 Jan 2017 17:40:53 +0000
+Subject: [PATCH 03/19] iio: adc128s052: allow driver to be matched using ACPI
+
+Allow driver to be matched by compatible string in
+ACPI device properties.
+
+Signed-off-by: Dan O'Donovan <dan@emutex.com>
+---
+ drivers/iio/adc/ti-adc128s052.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/iio/adc/ti-adc128s052.c b/drivers/iio/adc/ti-adc128s052.c
+index 89dfbd3..1a51278 100644
+--- a/drivers/iio/adc/ti-adc128s052.c
++++ b/drivers/iio/adc/ti-adc128s052.c
+@@ -203,7 +203,7 @@ MODULE_DEVICE_TABLE(spi, adc128_id);
+ static struct spi_driver adc128_driver = {
+ 	.driver = {
+ 		.name = "adc128s052",
+-		.of_match_table = of_match_ptr(adc128_of_match),
++		.of_match_table = adc128_of_match,
+ 	},
+ 	.probe = adc128_probe,
+ 	.remove = adc128_remove,
+-- 
+2.7.4
+

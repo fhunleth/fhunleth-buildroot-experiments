@@ -1,0 +1,71 @@
+From 3a7637855ab7e54b919fae6e6df20532fa1233f6 Mon Sep 17 00:00:00 2001
+From: Carlos Calderon <carlos@emutex.com>
+Date: Wed, 3 Oct 2018 16:39:39 +0100
+Subject: [PATCH 08/19] iio: adc128s052: allow device to be matched using acpi
+ _HID AANT1280
+
+The acpi _HID AANT1280 matches an ADC124S101 present on UP^2 board
+that is compatible with adc124s021.
+Add it to the driver.
+---
+ drivers/iio/adc/ti-adc128s052.c | 24 +++++++++++++++++++++++-
+ 1 file changed, 23 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/iio/adc/ti-adc128s052.c b/drivers/iio/adc/ti-adc128s052.c
+index 1a51278..fa84998 100644
+--- a/drivers/iio/adc/ti-adc128s052.c
++++ b/drivers/iio/adc/ti-adc128s052.c
+@@ -17,6 +17,7 @@
+ #include <linux/module.h>
+ #include <linux/iio/iio.h>
+ #include <linux/regulator/consumer.h>
++#include <linux/acpi.h>
+ 
+ struct adc128_configuration {
+ 	const struct iio_chan_spec	*channels;
+@@ -137,9 +138,21 @@ static int adc128_probe(struct spi_device *spi)
+ {
+ 	struct iio_dev *indio_dev;
+ 	struct adc128 *adc;
+-	int config = spi_get_device_id(spi)->driver_data;
++	int config;
+ 	int ret;
+ 
++	if (ACPI_COMPANION(&spi->dev)) {
++		const struct acpi_device_id *ad_id;
++		ad_id = acpi_match_device(spi->dev.driver->acpi_match_table,
++					  &spi->dev);
++		if (!ad_id)
++			return -ENODEV;
++
++		config = ad_id->driver_data;
++	} else {
++		config = spi_get_device_id(spi)->driver_data;
++	}
++
+ 	indio_dev = devm_iio_device_alloc(&spi->dev, sizeof(*adc));
+ 	if (!indio_dev)
+ 		return -ENOMEM;
+@@ -200,10 +213,19 @@ static const struct spi_device_id adc128_id[] = {
+ };
+ MODULE_DEVICE_TABLE(spi, adc128_id);
+ 
++#ifdef CONFIG_ACPI
++static const struct acpi_device_id adc128_acpi_match[] = {
++	{ "AANT1280", 2 }, /* ADC124S021 compatible ACPI ID */
++	{ }
++};
++MODULE_DEVICE_TABLE(acpi, adc128_acpi_match);
++#endif
++
+ static struct spi_driver adc128_driver = {
+ 	.driver = {
+ 		.name = "adc128s052",
+ 		.of_match_table = adc128_of_match,
++		.acpi_match_table = ACPI_PTR(adc128_acpi_match),
+ 	},
+ 	.probe = adc128_probe,
+ 	.remove = adc128_remove,
+-- 
+2.7.4
+
