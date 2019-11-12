@@ -1,0 +1,5 @@
+#!/bin/sh
+
+losetup /dev/loop0 /dev/mmcblk0p2
+cryptsetup open --type=plain --cipher=aes-cbc-plain --key-file=/key.txt /dev/loop0 my_crypt
+
