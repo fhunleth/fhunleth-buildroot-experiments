@@ -1,4 +1,5 @@
 # Custom packages
 
+source "$BR2_EXTERNAL_FHUNLETH_PATH/package/edk2/Config.in"
 source "$BR2_EXTERNAL_FHUNLETH_PATH/package/python-scrollphat/Config.in"
 source "$BR2_EXTERNAL_FHUNLETH_PATH/package/sdburner/Config.in"
