@@ -1,0 +1,18 @@
+#!/bin/sh
+
+#
+# Start the main application
+#
+
+case "$1" in
+    start)
+        mount -t efivarfs efivarfs /sys/firmware/efi/efivars
+        ;;
+    stop)
+        umount /sys/firmware/efi/efivars
+        ;;
+
+    *)
+        # Don't handle any other conditions
+        exit 0
+esac
