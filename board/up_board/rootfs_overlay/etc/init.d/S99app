@@ -1,15 +1,71 @@
 #!/bin/sh
 
 #
-# Start the main application
+# Install a .fw image to eMMC
 #
+# To use this, copy the .fw file that you want on the eMMC device to the
+# EFI system partition and call it install.fw. If you want to do the
+# installation yourself, copy a shell script called install.sh over.
+#
+
+LOADER_DATA_DEV=/dev/sda2
+DESTINATION=/dev/mmcblk0
+FWIMAGE=/mnt/install.fw
+USER_SCRIPT=/mnt/install.sh
+
+mount_filesystems() {
+     mount -t efivarfs efivarfs /sys/firmware/efi/efivars
+     while ! mount -t vfat -o ro $LOADER_DATA_DEV /mnt; do
+         echo "Trying to mount $LOADER_DATA_DEV..."
+         sleep 1
+     done
+}
+
+install_ourselves() {
+    echo "Running fwup to install $FWIMAGE..."
+    /usr/bin/fwup -a -i $FWIMAGE -d $DESTINATION -t complete
+    if [ $? -ne 0 ]; then
+        echo "Installation failed! Not powering off so that the system can be debugged."
+        exit 1
+    fi
+}
+
+install_user() {
+    echo "Running $USER_SCRIPT..."
+    sh $USER_SCRIPT
+    if [ $? -ne 0 ]; then
+        echo "Installation failed! Not powering off so that the system can be debugged."
+        exit 1
+    fi
+}
+
+install() {
+    mount_filesystems
+    if [ -e $USER_SCRIPT ]; then
+        install_user
+    else
+        install_ourselves
+    fi
+
+    umount /mnt
+
+    echo
+    echo
+    echo
+    echo
+    echo "Installation successful!!"
+    echo
+    echo "Remove the USB drive and the device will reboot in 10 seconds..."
+    sleep 10
+    echo "Rebooting..."
+    reboot
+}
 
 case "$1" in
     start)
-        mount -t efivarfs efivarfs /sys/firmware/efi/efivars
+        install
         ;;
     stop)
-        umount /sys/firmware/efi/efivars
         ;;
 
     *)
