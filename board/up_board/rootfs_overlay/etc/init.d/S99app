@@ -13,12 +13,45 @@ DESTINATION=/dev/mmcblk0
 FWIMAGE=/mnt/install.fw
 USER_SCRIPT=/mnt/install.sh
 
+leds_off() {
+    echo "none" > /sys/class/leds/upboard:yellow:/trigger
+    echo "none" > /sys/class/leds/upboard:green:/trigger
+    echo "none" > /sys/class/leds/upboard:red:/trigger
+    echo "0" > /sys/class/leds/upboard:yellow:/brightness
+    echo "0" > /sys/class/leds/upboard:green:/brightness
+    echo "0" > /sys/class/leds/upboard:red:/brightness
+}
+
+yellow_blink() {
+    leds_off
+    echo "timer" > /sys/class/leds/upboard:yellow:/trigger
+    echo "1" > /sys/class/leds/upboard:yellow:/brightness
+}
+
+green_blink() {
+    leds_off
+    echo "timer" > /sys/class/leds/upboard:green:/trigger
+    echo "1" > /sys/class/leds/upboard:green:/brightness
+}
+
+green_on() {
+    leds_off
+    echo "1" > /sys/class/leds/upboard:green:/brightness
+}
+
+red_on() {
+    leds_off
+    echo "1" > /sys/class/leds/upboard:red:/brightness
+}
+
 mount_filesystems() {
+     yellow_on
      mount -t efivarfs efivarfs /sys/firmware/efi/efivars
      while ! mount -t vfat -o ro $LOADER_DATA_DEV /mnt; do
          echo "Trying to mount $LOADER_DATA_DEV..."
          sleep 1
      done
+     yellow_blink
 }
 
 install_ourselves() {
@@ -26,20 +59,24 @@ install_ourselves() {
     /usr/bin/fwup -a -i $FWIMAGE -d $DESTINATION -t complete
     if [ $? -ne 0 ]; then
         echo "Installation failed! Not powering off so that the system can be debugged."
+        red_on
         exit 1
     fi
 }
 
 install_user() {
     echo "Running $USER_SCRIPT..."
+    cd /mnt
     sh $USER_SCRIPT
     if [ $? -ne 0 ]; then
         echo "Installation failed! Not powering off so that the system can be debugged."
+        red_on
         exit 1
     fi
 }
 
 install() {
+    yellow_blink
     mount_filesystems
     if [ -e $USER_SCRIPT ]; then
         install_user
@@ -47,6 +84,7 @@ install() {
         install_ourselves
     fi
 
+    cd /
     umount /mnt
 
     echo
@@ -56,8 +94,13 @@ install() {
     echo "Installation successful!!"
     echo
     echo "Remove the USB drive and the device will reboot in 10 seconds..."
+
+    green_on
+
     sleep 10
     echo "Rebooting..."
+
+    green_blink
     reboot
 }
 
