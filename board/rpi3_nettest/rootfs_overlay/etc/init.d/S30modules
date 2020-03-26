@@ -14,12 +14,19 @@ start() {
 
     # RPi WiFi
     modprobe brcmfmac
+    modprobe mac80211
+
+    # Batman
+    modprobe batman-adv
+
+    ifconfig wlan0 up
 
     echo "OK"
 }
 
 stop() {
     printf "Stopping modules: "
+    rmmod mac80211
     rmmod lan78xx
     rmmod smsc95xx
     rmmod brcmfmac
