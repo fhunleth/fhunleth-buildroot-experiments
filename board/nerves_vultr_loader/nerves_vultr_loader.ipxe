@@ -3,14 +3,16 @@
 # Vultr iPXE VM loader script
 #
 # When a VM is created on Vultr, it will need to have an image installed
-# onto the VM's disk. This loader project does this. To use it, copy this
-# script onto a webserver and update the links below if necessary. Most
-# likely, you'll only need to update the link to your Nerves .fw file. The
-# kernel and rootfs images shouldn't need to be rebuilt unless you have
-# special requirements.
+# onto the VM's disk. This loader project does this. To use it, create an iPXE
+# Custom Script of type PXE (https://my.vultr.com/startup/) and copy this script
+# into that webpage. Ensure that you update the links below if necessary. Most
+# likely, you'll only need to update the link to your Nerves .fw file which you
+# will need to store somewhere accessible on the web such as s3 or a github
+# release. The kernel and rootfs images shouldn't need to be rebuilt unless you
+# have special requirements.
 #
 # When you create the VM in Vultr, select "Upload ISO" for the Server Type,
-# and then click iPXE. The "iPXE Chain URL" is the URL to this file.
+# and then click iPXE Custom Script and choose the script you created.
 
 # Download the loader's Linux kernel
 kernel https://s3.amazonaws.com/files.troodon-software.com/vultr/bzImage
@@ -20,6 +22,7 @@ initrd https://s3.amazonaws.com/files.troodon-software.com/vultr/rootfs.cpio.xz
 
 # Download the Nerves .fw file into the root filesystem
 # IMPORTANT: Update this to your .fw file
+# you typically build this in your nerves project with `mix firmware`
 initrd https://s3.amazonaws.com/files.troodon-software.com/vultr/nerves_system_vultr.fw /root/install.fw
 
 # Boot!!
