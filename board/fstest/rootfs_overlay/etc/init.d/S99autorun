@@ -1,0 +1,19 @@
+#!/bin/sh
+
+AUTORUN=/mnt/hostshare/autorun.sh
+
+case "$1" in
+        start)
+                if [ -e $AUTORUN ]; then
+                    echo "Running $AUTORUN..."
+                    $AUTORUN
+                else
+                    echo "Didn't find $AUTORUN"
+                fi
+                ;;
+        *)
+                # Just ignore
+                exit 0
+esac
+
+

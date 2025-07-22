@@ -1,0 +1,4 @@
+config BR2_PACKAGE_WRITE_FILE
+	bool "write_file"
+	help
+	  write a file in a few ways for experiments
