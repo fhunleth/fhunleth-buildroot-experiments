@@ -1,4 +1,4 @@
-From bf4d621232837c5d13e57f468786b8720c50568c Mon Sep 17 00:00:00 2001
+From 2b6ad5f678138c7443c1b65fc1b713675b42b9f5 Mon Sep 17 00:00:00 2001
 From: Frank Hunleth <fhunleth@troodon-software.com>
 Date: Mon, 9 May 2016 13:21:56 -0400
 Subject: [PATCH] kernel-wireless-regdb: install regdb in kernel
@@ -20,10 +20,10 @@ net/wireless/db.txt.
  create mode 100644 package/kernel-wireless-regdb/kernel-wireless-regdb.mk
 
 diff --git a/linux/Config.ext.in b/linux/Config.ext.in
-index 256fe23148..cb2c4916d9 100644
+index 1f6f3ef7a4..c7dbe50a57 100644
 --- a/linux/Config.ext.in
 +++ b/linux/Config.ext.in
-@@ -154,4 +154,12 @@ config BR2_LINUX_KERNEL_EXT_AUFS_VERSION
+@@ -157,6 +157,14 @@ config BR2_LINUX_KERNEL_EXT_AUFS_VERSION
  
  endif # aufs
  
@@ -35,7 +35,9 @@ index 256fe23148..cb2c4916d9 100644
 +	  Install the wireless regulatory database into the kernel
 +	  to support the CONFIG_CFG80211_INTERNAL_REGDB option.
 +
- endmenu
+ # kernel extensions from br2-external trees, if any
+ source "$BR2_BASE_DIR/.br2-external.in.linux"
+ 
 diff --git a/linux/linux-ext-kernel-wireless-regdb.mk b/linux/linux-ext-kernel-wireless-regdb.mk
 new file mode 100644
 index 0000000000..3cec0cd9d8
@@ -55,17 +57,17 @@ index 0000000000..3cec0cd9d8
 +	cp -pf $(KERNEL_WIRELESS_REGDB_DIR)/db.txt $(LINUX_DIR)/net/wireless/db.txt
 +endef
 diff --git a/package/Config.in b/package/Config.in
-index 6578e110d9..30771bb2fe 100644
+index 0e8dd7c324..fcf87aa32e 100644
 --- a/package/Config.in
 +++ b/package/Config.in
-@@ -2035,6 +2035,7 @@ menu "Networking applications"
+@@ -2548,6 +2548,7 @@ endif
  	source "package/iwd/Config.in"
  	source "package/janus-gateway/Config.in"
  	source "package/keepalived/Config.in"
 +	source "package/kernel-wireless-regdb/Config.in"
  	source "package/kismet/Config.in"
  	source "package/knock/Config.in"
- 	source "package/leafnode2/Config.in"
+ 	source "package/ksmbd-tools/Config.in"
 diff --git a/package/kernel-wireless-regdb/Config.in b/package/kernel-wireless-regdb/Config.in
 new file mode 100644
 index 0000000000..8a54a21e0e
@@ -108,5 +110,5 @@ index 0000000000..21689d55f8
 +
 +$(eval $(generic-package))
 -- 
-2.20.1
+2.43.0
 
