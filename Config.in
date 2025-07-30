@@ -2,4 +2,3 @@
 
 source "$BR2_EXTERNAL_FHUNLETH_PATH/package/python-scrollphat/Config.in"
 source "$BR2_EXTERNAL_FHUNLETH_PATH/package/sdburner/Config.in"
-source "$BR2_EXTERNAL_FHUNLETH_PATH/package/write_file/Config.in"
